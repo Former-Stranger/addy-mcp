@@ -3,7 +3,7 @@
   "manifest_version": "0.4",
   "name": "addy-mcp",
   "display_name": "addy.io",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Manage your addy.io email aliases, recipients, domains, rules and blocklist.",
   "long_description": "Lets Claude manage your addy.io account: create, search and update aliases, manage recipients, usernames and custom domains, organise aliases with labels, build mail rules, and look into failed deliveries. Runs locally with your own API key, which is only ever sent to addy.io. Unofficial; not affiliated with addy.io.",
   "author": {

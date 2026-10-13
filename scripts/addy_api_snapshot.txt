@@ -1,0 +1,270 @@
+GET api/v1/api-token-details
+GET api/v1/account-details
+GET api/v1/account-notifications
+POST api/v1/account-notifications
+POST api/v1/aliases/get/bulk
+    body ids: string[] (required)
+POST api/v1/aliases/activate/bulk
+    body ids: string[] (required)
+POST api/v1/aliases/deactivate/bulk
+    body ids: string[] (required)
+POST api/v1/aliases/pin/bulk
+    body ids: string[] (required)
+POST api/v1/aliases/unpin/bulk
+    body ids: string[] (required)
+POST api/v1/aliases/delete/bulk
+    body ids: string[] (required)
+POST api/v1/aliases/restore/bulk
+    body ids: string[] (required)
+POST api/v1/aliases/forget/bulk
+    body ids: string[] (required)
+POST api/v1/aliases/recipients/bulk
+    body ids: string[] (required)
+    body recipient_ids: string[] (required)
+    body family_member_ids: string[] (optional)
+    body family_reply_send_ids: string[] (optional)
+POST api/v1/aliases/labels/bulk
+    body ids: string[] (required)
+    body label_ids: string[] (required)
+GET api/v1/aliases
+    query filter[deleted]: string (optional)
+    query filter[active]: string (optional)
+    query filter[pinned]: string (optional)
+    query filter[label]: string (optional)
+    query filter[search]: string (optional)
+    query sort: string (optional)
+    query page[number]: integer (optional)
+    query page[size]: integer (optional)
+    query with: string (optional)
+    query recipient: string (optional)
+    query domain: string (optional)
+    query username: string (optional)
+GET api/v1/aliases/{id}
+    url id: string (required)
+POST api/v1/aliases
+    body domain: string (required)
+    body description: string (optional)
+    body format: string (optional)
+    body local_part: string (optional)
+    body recipient_ids: string[] (optional)
+    body label_ids: string[] (optional)
+PATCH api/v1/aliases/{id}
+    url id: string (required)
+    body description: string (optional)
+    body from_name: string (optional)
+    body label_ids: string[] (optional)
+PATCH api/v1/aliases/{id}/restore
+    url id: string (required)
+DELETE api/v1/aliases/{id}
+    url id: string (required)
+DELETE api/v1/aliases/{id}/forget
+    url id: string (required)
+POST api/v1/active-aliases
+    body id: string (required)
+DELETE api/v1/active-aliases/{id}
+    url id: string (required)
+POST api/v1/pinned-aliases
+    body id: string (required)
+DELETE api/v1/pinned-aliases/{id}
+    url id: string (required)
+POST api/v1/attached-recipients-only
+    body id: string (required)
+DELETE api/v1/attached-recipients-only/{id}
+    url id: string (required)
+POST api/v1/alias-recipients
+    body alias_id: string (required)
+    body recipient_ids: string[] (required)
+    body family_member_ids: string[] (optional)
+    body family_reply_send_ids: string[] (optional)
+POST api/v1/alias-labels
+    body alias_id: string (required)
+    body label_ids: string[] (required)
+GET api/v1/app-version
+GET api/v1/blocklist
+    query filter[search]: string (optional)
+    query filter[type]: string (optional)
+    query sort: string (optional)
+    query page[number]: integer (optional)
+    query page[size]: integer (optional)
+POST api/v1/blocklist
+    body type: string (required)
+    body value: string (required)
+POST api/v1/blocklist/store/bulk
+    body type: string (required)
+    body values: string[] (required)
+POST api/v1/blocklist/delete/bulk
+    body ids: string[] (required)
+DELETE api/v1/blocklist/{id}
+    url id: string (required)
+GET api/v1/domain-options
+GET api/v1/domains
+GET api/v1/domains/{id}
+    url id: string (required)
+POST api/v1/domains
+    body domain: string (required)
+PATCH api/v1/domains/{id}
+    url id: string (required)
+    body description: string (optional)
+    body from_name: string (optional)
+    body auto_create_regex: string (optional)
+DELETE api/v1/domains/{id}
+    url id: string (required)
+PATCH api/v1/domains/{id}/default-recipient
+    url id: string (required)
+    body default_recipient: string (optional)
+POST api/v1/domains/{id}/check-sending
+    url id: string (required)
+POST api/v1/active-domains
+    body id: string (required)
+DELETE api/v1/active-domains/{id}
+    url id: string (required)
+POST api/v1/catch-all-domains
+    body id: string (required)
+DELETE api/v1/catch-all-domains/{id}
+    url id: string (required)
+POST api/v1/shared-with-family-domains
+    body id: string (required)
+DELETE api/v1/shared-with-family-domains/{id}
+    url id: string (required)
+GET api/internal/blocklist-check
+GET api/v1/failed-deliveries
+    query filter[email_type]: string (optional)
+    query page[number]: integer (optional)
+    query page[size]: integer (optional)
+GET api/v1/failed-deliveries/{id}
+    url id: string (required)
+POST api/v1/failed-deliveries/delete/bulk
+    body ids: string[] (required)
+DELETE api/v1/failed-deliveries/{id}
+    url id: string (required)
+GET api/v1/failed-deliveries/{id}/download
+    url id: string (required)
+POST api/v1/failed-deliveries/{id}/resend
+    url id: string (required)
+    body recipient_ids: string[] (optional)
+GET api/v1/labels
+    query filter[search]: string (optional)
+GET api/v1/labels/{id}
+    url id: string (required)
+POST api/v1/labels
+    body name: string (required)
+    body colour: string (required)
+PATCH api/v1/labels/{id}
+    url id: string (required)
+    body name: string (optional)
+    body colour: string (optional)
+DELETE api/v1/labels/{id}
+    url id: string (required)
+GET api/v1/recipients
+    query filter[verified]: string (optional)
+    query filter[alias_count]: string (optional)
+GET api/v1/recipients/{id}
+    url id: string (required)
+    query filter[alias_count]: string (optional)
+POST api/v1/recipients
+    body email: string (required)
+PATCH api/v1/recipients/{id}
+    url id: string (required)
+    body description: string (optional)
+DELETE api/v1/recipients/{id}
+    url id: string (required)
+POST api/v1/recipients/email/resend
+    body recipient_id: string (required)
+PATCH api/v1/recipient-keys/{id}
+    url id: string (required)
+    body key_data: string (required)
+DELETE api/v1/recipient-keys/{id}
+    url id: string (required)
+POST api/v1/encrypted-recipients
+    body id: string (required)
+DELETE api/v1/encrypted-recipients/{id}
+    url id: string (required)
+POST api/v1/inline-encrypted-recipients
+    body id: string (required)
+DELETE api/v1/inline-encrypted-recipients/{id}
+    url id: string (required)
+POST api/v1/protected-headers-recipients
+    body id: string (required)
+DELETE api/v1/protected-headers-recipients/{id}
+    url id: string (required)
+POST api/v1/remove-pgp-keys-recipients
+    body id: string (required)
+DELETE api/v1/remove-pgp-keys-recipients/{id}
+    url id: string (required)
+POST api/v1/remove-pgp-signatures-recipients
+    body id: string (required)
+DELETE api/v1/remove-pgp-signatures-recipients/{id}
+    url id: string (required)
+POST api/v1/allowed-recipients
+    body id: string (required)
+DELETE api/v1/allowed-recipients/{id}
+    url id: string (required)
+POST api/v1/active-recipients
+    body id: string (required)
+DELETE api/v1/active-recipients/{id}
+    url id: string (required)
+GET api/v1/rules
+GET api/v1/rules/{id}
+    url id: string (required)
+POST api/v1/rules
+    body name: string (required)
+    body conditions: object (required)
+    body type: string (required)
+    body match: string (optional)
+    body values: string[] (required)
+    body actions: object (required)
+    body type: string (required)
+    body value: string (required)
+    body operator: string (optional)
+    body forwards: boolean (optional)
+    body replies: boolean (optional)
+    body sends: boolean (optional)
+PATCH api/v1/rules/{id}
+    url id: string (required)
+    body name: string (required)
+    body conditions: object (required)
+    body type: string (required)
+    body match: string (optional)
+    body values: string[] (required)
+    body actions: object (required)
+    body type: string (required)
+    body value: string (required)
+    body operator: string (optional)
+    body forwards: boolean (optional)
+    body replies: boolean (optional)
+    body sends: boolean (optional)
+DELETE api/v1/rules/{id}
+    url id: string (required)
+POST api/v1/reorder-rules
+    body ids: string[] (required)
+POST api/v1/active-rules
+    body id: string (required)
+DELETE api/v1/active-rules/{id}
+    url id: string (required)
+GET api/v1/usernames
+GET api/v1/usernames/{id}
+    url id: string (required)
+POST api/v1/usernames
+    body username: string (required)
+PATCH api/v1/usernames/{id}
+    url id: string (required)
+    body description: string (optional)
+    body from_name: string (optional)
+    body auto_create_regex: string (optional)
+DELETE api/v1/usernames/{id}
+    url id: string (required)
+PATCH api/v1/usernames/{id}/default-recipient
+    url id: string (required)
+    body default_recipient: string (optional)
+POST api/v1/active-usernames
+    body id: string (required)
+DELETE api/v1/active-usernames/{id}
+    url id: string (required)
+POST api/v1/catch-all-usernames
+    body id: string (required)
+DELETE api/v1/catch-all-usernames/{id}
+    url id: string (required)
+POST api/v1/loginable-usernames
+    body id: string (required)
+DELETE api/v1/loginable-usernames/{id}
+    url id: string (required)

@@ -33,7 +33,7 @@ Requires [uv](https://docs.astral.sh/uv/getting-started/installation/). Open **S
   "mcpServers": {
     "addy": {
       "command": "uvx",
-      "args": ["addy-mcp"],
+      "args": ["addy-mcp@latest"],
       "env": {
         "ADDY_API_KEY": "paste-your-api-key-here"
       }
@@ -47,14 +47,16 @@ Then fully quit and reopen Claude Desktop. If it can't find `uvx`, replace `"uvx
 ### Claude Code
 
 ```bash
-claude mcp add addy --scope user --env ADDY_API_KEY=paste-your-api-key-here -- uvx addy-mcp
+claude mcp add addy --scope user --env ADDY_API_KEY=paste-your-api-key-here -- uvx addy-mcp@latest
 ```
 
 This makes the server available in Claude Code (the CLI and the desktop app's Code tab). Claude Desktop's chat uses a separate config, set up above.
 
 ### Other MCP clients
 
-Run `uvx addy-mcp` as a stdio server with `ADDY_API_KEY` set in its environment.
+Run `uvx addy-mcp@latest` as a stdio server with `ADDY_API_KEY` set in its environment.
+
+`@latest` makes uvx check PyPI for a new release each time the server starts. Leave it off and uvx keeps using whichever version it first downloaded. To stay on a specific version instead, use e.g. `addy-mcp==0.1.1`.
 
 ## Configuration
 
@@ -63,6 +65,14 @@ Run `uvx addy-mcp` as a stdio server with `ADDY_API_KEY` set in its environment.
 | `ADDY_API_KEY` | Yes | Your addy.io API key. |
 | `ADDY_READ_ONLY` | No | Set to `true` to hide every tool that can change your account. Claude can then only look things up. |
 | `ADDY_BASE_URL` | No | For self-hosted addy.io instances, e.g. `https://addy.example.com`. Defaults to `https://app.addy.io`. |
+
+## Updating
+
+- **Installed with `addy-mcp@latest`** (the commands above): restart Claude (or your MCP client) and the newest release is picked up automatically.
+- **Installed with plain `uvx addy-mcp`**: uvx keeps using the version it first downloaded. Change `addy-mcp` to `addy-mcp@latest` in your config and restart Claude.
+- **Claude Desktop extension (`.mcpb`)**: download the new `.mcpb` from the [Releases page](https://github.com/Former-Stranger/addy-mcp/releases/latest) and install it the same way.
+
+To see which version is newest, run `uvx addy-mcp@latest --version` (available from 0.1.1). To hear about new releases, watch the repo on GitHub (**Watch → Custom → Releases**). Changes are listed in the [changelog](CHANGELOG.md).
 
 ## What you can ask
 
@@ -113,8 +123,11 @@ uv run ruff check && uv run ruff format --check
 
 1. Bump `version` in `pyproject.toml`, run `uv run python scripts/sync_metadata.py`, and update `CHANGELOG.md`.
 2. Commit, then tag and push: `git tag v0.2.0 && git push origin v0.2.0`.
+3. Approve the `pypi` deployment when GitHub asks (the release pauses until a maintainer approves it).
 
 The release workflow publishes to PyPI, attaches the `.mcpb` bundle to a GitHub release, and updates the MCP Registry listing.
+
+A weekly workflow compares the [addy.io API docs](https://app.addy.io/docs/) with `scripts/addy_api_snapshot.txt` and opens an issue when the API changes. After updating the tools, refresh the snapshot with `python3 scripts/check_api_docs.py --update`. Dependabot opens weekly pull requests for dependency and GitHub Actions updates.
 
 ## License
 

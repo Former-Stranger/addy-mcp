@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+import argparse
 import os
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from typing import Annotated, Any, Literal, TypeVar
 
 from mcp.server.mcpserver import MCPServer
@@ -11,6 +12,7 @@ from mcp.server.mcpserver.exceptions import ToolError
 from mcp.types import ToolAnnotations
 from pydantic import BaseModel, Field
 
+from addy_mcp import __version__
 from addy_mcp.client import AddyClient
 
 INSTRUCTIONS = """\
@@ -889,7 +891,17 @@ def apply_read_only_mode() -> None:
         mcp.remove_tool(name)
 
 
-def main() -> None:
+def main(argv: Sequence[str] | None = None) -> None:
+    parser = argparse.ArgumentParser(
+        prog="addy-mcp",
+        description=(
+            "MCP server for addy.io. Started by an MCP client (e.g. Claude) over stdio; "
+            "set ADDY_API_KEY in its environment."
+        ),
+    )
+    parser.add_argument("--version", action="version", version=f"addy-mcp {__version__}")
+    parser.parse_args(argv)
+
     if os.environ.get(READ_ONLY_ENV, "").strip().lower() in {"1", "true", "yes", "on"}:
         apply_read_only_mode()
     mcp.run()

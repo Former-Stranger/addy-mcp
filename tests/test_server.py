@@ -5,6 +5,7 @@ import httpx
 import pytest
 from mcp import Client
 
+import addy_mcp
 from addy_mcp import server
 from addy_mcp.client import AddyClient
 
@@ -175,3 +176,10 @@ async def test_read_only_mode_hides_write_tools():
         assert all(not t.startswith(("create_", "delete_", "update_", "set_")) for t in names)
     finally:
         importlib.reload(server)
+
+
+def test_version_flag(capsys):
+    with pytest.raises(SystemExit) as exit_info:
+        server.main(["--version"])
+    assert exit_info.value.code == 0
+    assert capsys.readouterr().out.strip() == f"addy-mcp {addy_mcp.__version__}"

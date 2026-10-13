@@ -1,0 +1,50 @@
+name: addy.io API watch
+
+# Weekly check for changes to the addy.io API docs (new endpoints, parameters, ...).
+# Opens an issue with the diff so the MCP tools can be updated.
+on:
+  schedule:
+    - cron: "17 9 * * 1" # Mondays 09:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Compare the live docs with the saved snapshot
+        id: compare
+        run: |
+          set +e
+          python3 scripts/check_api_docs.py > diff.txt
+          status=$?
+          set -e
+          cat diff.txt
+          if [ $status -gt 1 ]; then exit $status; fi
+          echo "changed=$([ $status -eq 1 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+      - name: Open an issue (unless one is already open)
+        if: steps.compare.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="addy.io API docs changed"
+          existing=$(gh issue list --state open --search "\"$title\" in:title" --json number --jq '.[0].number')
+          {
+            echo "The [addy.io API docs](https://app.addy.io/docs/) no longer match \`scripts/addy_api_snapshot.txt\`."
+            echo
+            echo '```diff'
+            cat diff.txt
+            echo '```'
+            echo
+            echo "Update the tools in \`src/addy_mcp/server.py\` if needed, then refresh the snapshot with"
+            echo "\`python3 scripts/check_api_docs.py --update\` and close this issue."
+          } > body.md
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file body.md
+          else
+            gh issue create --title "$title" --body-file body.md
+          fi

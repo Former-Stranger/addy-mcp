@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.1 - 2026-10-13
+
+- Added `--version` (and `--help`): `uvx addy-mcp@latest --version` shows the newest release without starting the server.
+- Install instructions now use `addy-mcp@latest`, so uvx picks up new releases whenever the server starts. Without `@latest`, uvx keeps using the version it first downloaded.
+- README: new "Updating" section.
+- Maintenance: weekly check for addy.io API changes, Dependabot for dependencies and GitHub Actions, and releases now need maintainer approval before publishing to PyPI.
+
 ## 0.1.0 - 2026-10-13
 
 First public release.
