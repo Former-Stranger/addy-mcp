@@ -1,0 +1,45 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.Former-Stranger/addy-mcp",
+  "title": "addy.io",
+  "description": "Manage addy.io email aliases, recipients, domains, rules and blocklist.",
+  "websiteUrl": "https://github.com/Former-Stranger/addy-mcp",
+  "repository": {
+    "url": "https://github.com/Former-Stranger/addy-mcp",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "addy-mcp",
+      "version": "0.1.0",
+      "runtimeHint": "uvx",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "ADDY_API_KEY",
+          "description": "Your addy.io API key (create one at https://app.addy.io/settings/api)",
+          "isRequired": true,
+          "isSecret": true
+        },
+        {
+          "name": "ADDY_READ_ONLY",
+          "description": "Set to true to hide every tool that can change your account",
+          "default": "false",
+          "choices": [
+            "true",
+            "false"
+          ]
+        },
+        {
+          "name": "ADDY_BASE_URL",
+          "description": "Base URL for a self-hosted addy.io instance",
+          "default": "https://app.addy.io"
+        }
+      ]
+    }
+  ]
+}

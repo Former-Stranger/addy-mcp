@@ -1,0 +1,60 @@
+[project]
+name = "addy-mcp"
+version = "0.1.0"
+description = "MCP server for managing an addy.io account (aliases, recipients, domains, rules, and more)"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "AJ", email = "845325+Former-Stranger@users.noreply.github.com" }]
+requires-python = ">=3.10"
+keywords = ["mcp", "addy", "addy.io", "anonaddy", "email", "alias", "privacy", "claude"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Communications :: Email",
+]
+dependencies = [
+    "mcp>=2.3.0,<3",
+    "httpx>=0.28",
+    "truststore>=0.10",
+]
+
+[project.urls]
+Homepage = "https://github.com/Former-Stranger/addy-mcp"
+Issues = "https://github.com/Former-Stranger/addy-mcp/issues"
+Changelog = "https://github.com/Former-Stranger/addy-mcp/blob/main/CHANGELOG.md"
+
+[project.scripts]
+addy-mcp = "addy_mcp.server:main"
+
+[dependency-groups]
+dev = ["pytest>=8", "pytest-asyncio>=0.24", "ruff>=0.6"]
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "tests", "README.md", "LICENSE", "CHANGELOG.md"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.uv]
+# Make uv reinstall the package whenever the source changes (needed for `uv run --no-editable`).
+cache-keys = [{ file = "pyproject.toml" }, { file = "src/**/*.py" }]

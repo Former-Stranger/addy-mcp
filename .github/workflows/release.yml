@@ -1,0 +1,115 @@
+name: Release
+
+# Push a tag like v0.1.0 to publish to PyPI, create a GitHub release with the .mcpb bundle,
+# and update the MCP Registry listing.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          python-version: "3.13"
+      - name: Check the tag matches the package version
+        id: version
+        run: |
+          version=$(uv version --short)
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match pyproject.toml version $version"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - run: uv run --no-editable python -m pytest -q
+      - run: uv run --no-editable python scripts/sync_metadata.py --check
+      - run: uv build
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+      - name: Build the Claude Desktop extension
+        run: |
+          mkdir -p bundle
+          npx -y @anthropic-ai/mcpb@2.1.2 pack . "bundle/addy-mcp-${{ steps.version.outputs.version }}.mcpb"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: python-dist
+          path: dist/
+      - uses: actions/upload-artifact@v7
+        with:
+          name: mcpb
+          path: bundle/
+
+  pypi:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/addy-mcp/
+    permissions:
+      id-token: write # PyPI Trusted Publishing
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: python-dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@v1.14.2
+
+  github-release:
+    needs: [build, pypi]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          path: artifacts/
+          merge-multiple: true
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" artifacts/* --title "$GITHUB_REF_NAME" --generate-notes
+
+  mcp-registry:
+    needs: [build, pypi, github-release]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # MCP Registry GitHub OIDC login
+    env:
+      VERSION: ${{ needs.build.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: mcpb
+          path: bundle/
+      - name: Wait for PyPI to serve the new version
+        run: |
+          for i in $(seq 1 30); do
+            curl -sf "https://pypi.org/pypi/addy-mcp/$VERSION/json" > /dev/null && exit 0
+            sleep 10
+          done
+          echo "::error::addy-mcp $VERSION did not appear on PyPI"; exit 1
+      - name: Add the .mcpb bundle to server.json
+        run: |
+          file="addy-mcp-$VERSION.mcpb"
+          sha=$(sha256sum "bundle/$file" | cut -d' ' -f1)
+          url="https://github.com/$GITHUB_REPOSITORY/releases/download/$GITHUB_REF_NAME/$file"
+          jq --arg url "$url" --arg sha "$sha" --arg version "$VERSION" \
+            '.packages += [{registryType: "mcpb", identifier: $url, version: $version, fileSha256: $sha,
+              transport: {type: "stdio"}}]' server.json > server.tmp && mv server.tmp server.json
+          cat server.json
+      - name: Install mcp-publisher
+        run: |
+          curl -sL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_linux_amd64.tar.gz" | tar xz mcp-publisher
+      - run: ./mcp-publisher login github-oidc
+      - run: ./mcp-publisher publish

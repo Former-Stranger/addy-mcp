@@ -1,0 +1,16 @@
+# Only the server source, its pyproject/lockfile, and docs go into the .mcpb bundle.
+.venv/
+.git/
+.github/
+.pytest_cache/
+.ruff_cache/
+__pycache__/
+*.pyc
+dist/
+build/
+tests/
+scripts/
+server.json
+*.mcpb
+.gitignore
+.mcpbignore

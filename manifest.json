@@ -1,0 +1,337 @@
+{
+  "$schema": "https://raw.githubusercontent.com/modelcontextprotocol/mcpb/main/schemas/mcpb-manifest-v0.4.schema.json",
+  "manifest_version": "0.4",
+  "name": "addy-mcp",
+  "display_name": "addy.io",
+  "version": "0.1.0",
+  "description": "Manage your addy.io email aliases, recipients, domains, rules and blocklist.",
+  "long_description": "Lets Claude manage your addy.io account: create, search and update aliases, manage recipients, usernames and custom domains, organise aliases with labels, build mail rules, and look into failed deliveries. Runs locally with your own API key, which is only ever sent to addy.io. Unofficial; not affiliated with addy.io.",
+  "author": {
+    "name": "AJ",
+    "url": "https://github.com/Former-Stranger"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Former-Stranger/addy-mcp.git"
+  },
+  "homepage": "https://github.com/Former-Stranger/addy-mcp",
+  "documentation": "https://github.com/Former-Stranger/addy-mcp#readme",
+  "support": "https://github.com/Former-Stranger/addy-mcp/issues",
+  "server": {
+    "type": "uv",
+    "entry_point": "src/addy_mcp/server.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "${__dirname}",
+        "--frozen",
+        "--no-dev",
+        "--no-editable",
+        "addy-mcp"
+      ],
+      "env": {
+        "ADDY_API_KEY": "${user_config.api_key}",
+        "ADDY_READ_ONLY": "${user_config.read_only}",
+        "ADDY_BASE_URL": "${user_config.base_url}"
+      }
+    }
+  },
+  "user_config": {
+    "api_key": {
+      "type": "string",
+      "title": "addy.io API key",
+      "description": "Create one at https://app.addy.io/settings/api",
+      "sensitive": true,
+      "required": true
+    },
+    "read_only": {
+      "type": "boolean",
+      "title": "Read-only mode",
+      "description": "Only allow tools that look things up; hide every tool that can change your account.",
+      "default": false,
+      "required": false
+    },
+    "base_url": {
+      "type": "string",
+      "title": "addy.io URL",
+      "description": "Only change this for a self-hosted addy.io instance.",
+      "default": "https://app.addy.io",
+      "required": false
+    }
+  },
+  "tools": [
+    {
+      "name": "get_account_details",
+      "description": "Get account details: username, plan/subscription, bandwidth used, default alias domain/format, limits, etc."
+    },
+    {
+      "name": "get_api_token_details",
+      "description": "Get the name, creation date and expiry of the API token this server is using."
+    },
+    {
+      "name": "get_account_notifications",
+      "description": "Get account notifications/announcements from addy.io."
+    },
+    {
+      "name": "get_domain_options",
+      "description": "Get the domains available for creating aliases, plus the account's default alias domain and format."
+    },
+    {
+      "name": "get_app_version",
+      "description": "Get the addy.io app version (only available on self-hosted instances)."
+    },
+    {
+      "name": "list_aliases",
+      "description": "List or search aliases. Results are paginated; the response includes `meta` with totals and page counts."
+    },
+    {
+      "name": "get_alias",
+      "description": "Get a single alias, including its recipients, labels and statistics."
+    },
+    {
+      "name": "create_alias",
+      "description": "Create a new alias. Use get_domain_options to see which domains are available."
+    },
+    {
+      "name": "update_alias",
+      "description": "Update an alias's description, from name, or labels. Only the fields you pass are changed."
+    },
+    {
+      "name": "delete_alias",
+      "description": "Delete an alias. It stops receiving mail but can be brought back with restore_alias."
+    },
+    {
+      "name": "restore_alias",
+      "description": "Restore a deleted alias."
+    },
+    {
+      "name": "forget_alias",
+      "description": "PERMANENTLY forget an alias: it is disassociated from the account and cannot be restored."
+    },
+    {
+      "name": "set_alias_option",
+      "description": "Turn an alias option on or off (activate/deactivate, pin/unpin, limit reply/send to attached recipients)."
+    },
+    {
+      "name": "set_alias_recipients",
+      "description": "Replace the set of recipients an alias forwards to."
+    },
+    {
+      "name": "set_alias_labels",
+      "description": "Replace the labels attached to an alias."
+    },
+    {
+      "name": "bulk_alias_action",
+      "description": "Apply one action to up to 25 aliases at once (or fetch them with action='get')."
+    },
+    {
+      "name": "bulk_set_alias_recipients",
+      "description": "Replace the recipients of up to 25 aliases at once."
+    },
+    {
+      "name": "bulk_set_alias_labels",
+      "description": "Replace the labels of up to 25 aliases at once."
+    },
+    {
+      "name": "list_recipients",
+      "description": "List the account's recipients (the real mailboxes aliases forward to)."
+    },
+    {
+      "name": "get_recipient",
+      "description": "Get a single recipient and its settings."
+    },
+    {
+      "name": "create_recipient",
+      "description": "Add a new recipient. addy.io emails it a verification link; it can't be used until verified."
+    },
+    {
+      "name": "update_recipient",
+      "description": "Set a recipient's description."
+    },
+    {
+      "name": "delete_recipient",
+      "description": "Delete a recipient. Aliases that used it fall back to the default recipient."
+    },
+    {
+      "name": "resend_recipient_verification",
+      "description": "Resend the verification email for an unverified recipient."
+    },
+    {
+      "name": "add_recipient_public_key",
+      "description": "Add a public GPG key to a recipient so forwarded mail can be encrypted."
+    },
+    {
+      "name": "remove_recipient_public_key",
+      "description": "Remove a recipient's public GPG key (this also turns off encryption for it)."
+    },
+    {
+      "name": "set_recipient_option",
+      "description": "Turn a recipient option on or off."
+    },
+    {
+      "name": "list_usernames",
+      "description": "List the account's usernames (each gives a subdomain like name.anonaddy.com for on-the-fly aliases)."
+    },
+    {
+      "name": "get_username",
+      "description": "Get a single username and its settings."
+    },
+    {
+      "name": "create_username",
+      "description": "Create an additional username (counts against the plan's username limit)."
+    },
+    {
+      "name": "update_username",
+      "description": "Update a username's description, from name, or auto-create regex."
+    },
+    {
+      "name": "delete_username",
+      "description": "Delete a username. Its aliases stop working."
+    },
+    {
+      "name": "set_username_default_recipient",
+      "description": "Set (or clear) the default recipient for aliases on a username."
+    },
+    {
+      "name": "set_username_option",
+      "description": "Turn a username option on or off."
+    },
+    {
+      "name": "list_domains",
+      "description": "List the custom domains connected to the account."
+    },
+    {
+      "name": "get_domain",
+      "description": "Get a single custom domain and its settings/verification status."
+    },
+    {
+      "name": "create_domain",
+      "description": "Add a custom domain. Its DNS must already have the TXT verification record addy.io shows in its dashboard."
+    },
+    {
+      "name": "update_domain",
+      "description": "Update a custom domain's description, from name, or auto-create regex."
+    },
+    {
+      "name": "delete_domain",
+      "description": "Delete a custom domain. Its aliases stop working."
+    },
+    {
+      "name": "set_domain_default_recipient",
+      "description": "Set (or clear) the default recipient for aliases on a custom domain."
+    },
+    {
+      "name": "check_domain_sending_records",
+      "description": "Check a custom domain's DNS records (SPF, DKIM, DMARC, ...) for sending/replying from aliases."
+    },
+    {
+      "name": "set_domain_option",
+      "description": "Turn a custom domain option on or off."
+    },
+    {
+      "name": "list_labels",
+      "description": "List the labels used to organise aliases."
+    },
+    {
+      "name": "get_label",
+      "description": "Get a single label."
+    },
+    {
+      "name": "create_label",
+      "description": "Create a label for organising aliases."
+    },
+    {
+      "name": "update_label",
+      "description": "Rename a label or change its colour."
+    },
+    {
+      "name": "delete_label",
+      "description": "Delete a label (aliases are kept, just unlabelled)."
+    },
+    {
+      "name": "list_rules",
+      "description": "List all rules, in the order they are applied."
+    },
+    {
+      "name": "get_rule",
+      "description": "Get a single rule with its conditions and actions."
+    },
+    {
+      "name": "create_rule",
+      "description": "Create a rule that runs actions on emails matching conditions."
+    },
+    {
+      "name": "update_rule",
+      "description": "Update a rule. Only the fields you pass change; the rest are kept from the current rule."
+    },
+    {
+      "name": "delete_rule",
+      "description": "Delete a rule."
+    },
+    {
+      "name": "reorder_rules",
+      "description": "Set the order rules are applied in."
+    },
+    {
+      "name": "set_rule_active",
+      "description": "Activate or deactivate a rule."
+    },
+    {
+      "name": "list_blocklist",
+      "description": "List blocked senders/domains, with how many emails each has blocked."
+    },
+    {
+      "name": "add_to_blocklist",
+      "description": "Block mail from sender email addresses or whole domains, across all aliases."
+    },
+    {
+      "name": "remove_from_blocklist",
+      "description": "Unblock blocklist entries by id (see list_blocklist)."
+    },
+    {
+      "name": "list_failed_deliveries",
+      "description": "List emails that addy.io failed to deliver (or quarantined)."
+    },
+    {
+      "name": "get_failed_delivery",
+      "description": "Get details of a failed delivery (sender, alias, bounce reason, ...)."
+    },
+    {
+      "name": "download_failed_delivery",
+      "description": "Download the raw email (.eml source) of a failed delivery, if addy.io stored it."
+    },
+    {
+      "name": "resend_failed_delivery",
+      "description": "Retry delivering a failed or quarantined email."
+    },
+    {
+      "name": "delete_failed_deliveries",
+      "description": "Delete failed delivery records (and any stored email)."
+    }
+  ],
+  "tools_generated": false,
+  "keywords": [
+    "addy",
+    "addy.io",
+    "anonaddy",
+    "email",
+    "alias",
+    "privacy"
+  ],
+  "license": "MIT",
+  "privacy_policies": [
+    "https://addy.io/privacy/"
+  ],
+  "compatibility": {
+    "platforms": [
+      "darwin",
+      "win32",
+      "linux"
+    ],
+    "runtimes": {
+      "python": ">=3.10"
+    }
+  }
+}
