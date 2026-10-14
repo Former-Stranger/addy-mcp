@@ -1,8 +1,11 @@
 # Changelog
 
-## Unreleased
+## 0.1.2 - 2026-10-14
 
+- `ADDY_API_KEY_FILE`: read the API key from a file (e.g. a `chmod 600` file or a Docker/Kubernetes secret). Takes precedence over `ADDY_API_KEY`; a missing or empty file is an error rather than a silent fallback.
+- README: new "Storing your key securely" section (Claude Desktop extension, macOS Keychain or 1Password wrapper, key file, VS Code secret input).
 - README: installing a newer `.mcpb` keeps your API key and settings.
+- README: Claude Desktop stores the key encrypted (previously described as "in your system keychain", which wasn't verified).
 
 ## 0.1.1 - 2026-10-13
 
@@ -20,4 +23,4 @@ First public release.
 - `ADDY_READ_ONLY=true` hides every tool that can change the account.
 - `ADDY_BASE_URL` for self-hosted addy.io instances.
 - TLS certificates are verified against the operating system's trust store, so it works behind corporate proxies.
-- Claude Desktop extension (`.mcpb`) with the API key stored in the system keychain.
+- Claude Desktop extension (`.mcpb`) with the API key stored encrypted by Claude Desktop.

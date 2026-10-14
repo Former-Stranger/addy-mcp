@@ -8,12 +8,12 @@
     "url": "https://github.com/Former-Stranger/addy-mcp",
     "source": "github"
   },
-  "version": "0.1.1",
+  "version": "0.1.2",
   "packages": [
     {
       "registryType": "pypi",
       "identifier": "addy-mcp",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "runtimeHint": "uvx",
       "transport": {
         "type": "stdio"
@@ -21,9 +21,14 @@
       "environmentVariables": [
         {
           "name": "ADDY_API_KEY",
-          "description": "Your addy.io API key (create one at https://app.addy.io/settings/api)",
+          "description": "Your addy.io API key (create one at https://app.addy.io/settings/api). Alternatively set ADDY_API_KEY_FILE.",
           "isRequired": true,
           "isSecret": true
+        },
+        {
+          "name": "ADDY_API_KEY_FILE",
+          "description": "Path to a file containing the API key; takes precedence over ADDY_API_KEY",
+          "format": "filepath"
         },
         {
           "name": "ADDY_READ_ONLY",

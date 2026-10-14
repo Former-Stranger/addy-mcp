@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import os
 import ssl
+from pathlib import Path
 from typing import Any
 
 import httpx
@@ -23,8 +24,8 @@ USER_AGENT = f"addy-mcp/{__version__} (+https://github.com/Former-Stranger/addy-
 class AddyClient:
     """Makes authenticated requests to the addy.io API.
 
-    The API key and base URL are read from ``ADDY_API_KEY`` and ``ADDY_BASE_URL``
-    (the latter only matters for self-hosted instances).
+    The API key is read from the file named by ``ADDY_API_KEY_FILE`` if set, otherwise from
+    ``ADDY_API_KEY``. ``ADDY_BASE_URL`` only matters for self-hosted instances.
     """
 
     def __init__(
@@ -40,12 +41,7 @@ class AddyClient:
 
     def _client(self) -> httpx.AsyncClient:
         if self._http is None:
-            api_key = self._api_key or os.environ.get("ADDY_API_KEY")
-            if not api_key:
-                raise ToolError(
-                    "ADDY_API_KEY is not set. Create an API key at https://app.addy.io/settings/api "
-                    "and add it to this MCP server's environment."
-                )
+            api_key = self._api_key or _api_key_from_environment()
             self._http = httpx.AsyncClient(
                 base_url=f"{self._base_url}/api/v1",
                 headers={
@@ -98,6 +94,25 @@ class AddyClient:
         if self._http is not None:
             await self._http.aclose()
             self._http = None
+
+
+def _api_key_from_environment() -> str:
+    key_file = os.environ.get("ADDY_API_KEY_FILE")
+    if key_file:
+        try:
+            key = Path(key_file).expanduser().read_text(encoding="utf-8").strip()
+        except OSError as exc:
+            raise ToolError(f"Could not read ADDY_API_KEY_FILE ({key_file}): {exc.strerror}") from exc
+        if not key:
+            raise ToolError(f"ADDY_API_KEY_FILE ({key_file}) is empty.")
+        return key
+    key = os.environ.get("ADDY_API_KEY", "").strip()
+    if not key:
+        raise ToolError(
+            "No API key: set ADDY_API_KEY (or ADDY_API_KEY_FILE) in this MCP server's environment. "
+            "Create a key at https://app.addy.io/settings/api"
+        )
+    return key
 
 
 _STATUS_HINTS = {

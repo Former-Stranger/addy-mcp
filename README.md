@@ -22,7 +22,7 @@ In addy.io go to **Settings → API Keys** (<https://app.addy.io/settings/api>) 
 
 1. Download the latest `addy-mcp-<version>.mcpb` from the [Releases page](https://github.com/Former-Stranger/addy-mcp/releases/latest).
 2. Double-click it (or drag it into **Settings → Extensions** in Claude Desktop) and click **Install**.
-3. Paste your API key when asked. Claude Desktop stores it in your system keychain.
+3. Paste your API key when asked. Claude Desktop stores it encrypted.
 
 ### Claude Desktop (manual config)
 
@@ -62,9 +62,51 @@ Run `uvx addy-mcp@latest` as a stdio server with `ADDY_API_KEY` set in its envir
 
 | Environment variable | Required | Description |
 | --- | --- | --- |
-| `ADDY_API_KEY` | Yes | Your addy.io API key. |
+| `ADDY_API_KEY` | Yes* | Your addy.io API key. |
+| `ADDY_API_KEY_FILE` | No | Path to a file containing the key, instead of `ADDY_API_KEY`. Takes precedence if both are set. *One of the two is required. |
 | `ADDY_READ_ONLY` | No | Set to `true` to hide every tool that can change your account. Claude can then only look things up. |
 | `ADDY_BASE_URL` | No | For self-hosted addy.io instances, e.g. `https://addy.example.com`. Defaults to `https://app.addy.io`. |
+
+## Storing your key securely
+
+The setup above keeps the key in plain text in your MCP client's config file. That's the usual approach for local MCP servers, but you can do better:
+
+- **Claude Desktop extension:** the `.mcpb` install stores the key encrypted. Nothing else to do.
+- **macOS Keychain (Claude Code and other clients):** keep the key in the Keychain and fetch it only when the server starts, so it's never written to a config file. Add the key (you'll be prompted for it, so it doesn't end up in your shell history):
+
+  ```bash
+  security add-generic-password -a "$USER" -s addy-mcp -w
+  ```
+
+  Then add the server with a small wrapper instead of `--env`:
+
+  ```bash
+  claude mcp add addy --scope user -- /bin/sh -c 'ADDY_API_KEY="$(security find-generic-password -a "$USER" -s addy-mcp -w)" || exit 1; export ADDY_API_KEY; exec uvx addy-mcp@latest'
+  ```
+
+  If the server fails to start because `uvx` isn't found, replace `uvx` with its full path from `which uvx`.
+
+  On Linux, the same pattern works with `secret-tool store --label=addy-mcp service addy-mcp` and `secret-tool lookup service addy-mcp`. With 1Password, use `op read "op://<vault>/<item>/credential"` in place of the `security` command.
+- **Key file:** set `ADDY_API_KEY_FILE` to a file that only you can read (`chmod 600`), or to a Docker or Kubernetes secret mount.
+- **VS Code:** let VS Code prompt for the key and keep it in its secret storage:
+
+  ```json
+  {
+    "inputs": [
+      { "type": "promptString", "id": "addy-api-key", "description": "addy.io API key", "password": true }
+    ],
+    "servers": {
+      "addy": {
+        "type": "stdio",
+        "command": "uvx",
+        "args": ["addy-mcp@latest"],
+        "env": { "ADDY_API_KEY": "${input:addy-api-key}" }
+      }
+    }
+  }
+  ```
+
+Whichever you choose, use a separate addy.io key for each app or device, so you can revoke one without breaking the others, and give it an expiry date.
 
 ## Updating
 

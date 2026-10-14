@@ -154,6 +154,7 @@ async def test_blocklist_uses_bulk_endpoint_for_many(addy):
 
 async def test_missing_api_key(monkeypatch):
     monkeypatch.delenv("ADDY_API_KEY", raising=False)
+    monkeypatch.delenv("ADDY_API_KEY_FILE", raising=False)
     monkeypatch.setattr(server, "api", AddyClient())
     result = await call("list_recipients")
     assert result.is_error
@@ -183,3 +184,47 @@ def test_version_flag(capsys):
         server.main(["--version"])
     assert exit_info.value.code == 0
     assert capsys.readouterr().out.strip() == f"addy-mcp {addy_mcp.__version__}"
+
+
+def _env_client(monkeypatch, seen):
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request.headers["authorization"])
+        return httpx.Response(200, json={"data": []})
+
+    client = AddyClient(base_url="https://addy.test", transport=httpx.MockTransport(handler))
+    monkeypatch.setattr(server, "api", client)
+
+
+async def test_api_key_file_takes_precedence(monkeypatch, tmp_path):
+    key_file = tmp_path / "addy_key"
+    key_file.write_text("  key-from-file\n")
+    monkeypatch.setenv("ADDY_API_KEY", "key-from-env")
+    monkeypatch.setenv("ADDY_API_KEY_FILE", str(key_file))
+    seen = []
+    _env_client(monkeypatch, seen)
+    result = await call("list_labels")
+    assert not result.is_error
+    assert seen == ["Bearer key-from-file"]
+
+
+async def test_api_key_env_used_without_file(monkeypatch):
+    monkeypatch.delenv("ADDY_API_KEY_FILE", raising=False)
+    monkeypatch.setenv("ADDY_API_KEY", "key-from-env")
+    seen = []
+    _env_client(monkeypatch, seen)
+    await call("list_labels")
+    assert seen == ["Bearer key-from-env"]
+
+
+@pytest.mark.parametrize(("contents", "expected"), [(None, "Could not read"), ("  \n", "is empty")])
+async def test_api_key_file_errors(monkeypatch, tmp_path, contents, expected):
+    key_file = tmp_path / "addy_key"
+    if contents is not None:
+        key_file.write_text(contents)
+    monkeypatch.setenv("ADDY_API_KEY", "key-from-env")  # must not silently fall back
+    monkeypatch.setenv("ADDY_API_KEY_FILE", str(key_file))
+    seen = []
+    _env_client(monkeypatch, seen)
+    result = await call("list_labels")
+    assert result.is_error and expected in result.content[0].text
+    assert seen == []
