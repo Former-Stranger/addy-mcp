@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- README: installing a newer `.mcpb` keeps your API key and settings.
+
 ## 0.1.1 - 2026-10-13
 
 - Added `--version` (and `--help`): `uvx addy-mcp@latest --version` shows the newest release without starting the server.

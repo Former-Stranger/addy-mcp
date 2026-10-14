@@ -70,7 +70,7 @@ Run `uvx addy-mcp@latest` as a stdio server with `ADDY_API_KEY` set in its envir
 
 - **Installed with `addy-mcp@latest`** (the commands above): restart Claude (or your MCP client) and the newest release is picked up automatically.
 - **Installed with plain `uvx addy-mcp`**: uvx keeps using the version it first downloaded. Change `addy-mcp` to `addy-mcp@latest` in your config and restart Claude.
-- **Claude Desktop extension (`.mcpb`)**: download the new `.mcpb` from the [Releases page](https://github.com/Former-Stranger/addy-mcp/releases/latest) and install it the same way.
+- **Claude Desktop extension (`.mcpb`)**: download the new `.mcpb` from the [Releases page](https://github.com/Former-Stranger/addy-mcp/releases/latest) and install it the same way. Your API key and settings are kept, so you won't be asked for them again.
 
 To see which version is newest, run `uvx addy-mcp@latest --version` (available from 0.1.1). To hear about new releases, watch the repo on GitHub (**Watch → Custom → Releases**). Changes are listed in the [changelog](CHANGELOG.md).
 
